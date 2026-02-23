@@ -24,121 +24,215 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        color: isDark ? const Color(0xFF1A1D2E) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(40),
+            blurRadius: 30,
+            offset: const Offset(0, -4),
+          ),
+        ],
       ),
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-        left: 20,
-        right: 20,
-        top: 20,
-      ),
+      padding: EdgeInsets.fromLTRB(24, 0, 24, bottomInset + 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHandle(),
-          Text(
-            'New Task',
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          // Handle bar
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.symmetric(vertical: 14),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white24 : Colors.black12,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
           ),
-          const SizedBox(height: 20),
-          _buildTextField(
-            _titleController,
-            'What needs to be done?',
-            Icons.task_alt,
-            true,
+          // Title
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [
+                      AppColors.primaryGradientStart,
+                      AppColors.primaryGradientEnd,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.add_task_rounded,
+                  color: Colors.white,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'New Task',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : const Color(0xFF1A1A2E),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          _buildTextField(
-            _descriptionController,
-            'Description (optional)',
-            Icons.description_outlined,
-            false,
-          ),
-          const SizedBox(height: 20),
-          _buildPrioritySelector(),
           const SizedBox(height: 24),
-          _buildAddButton(),
+          // Task name field
+          TextField(
+            controller: _titleController,
+            autofocus: true,
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              color: isDark ? Colors.white : const Color(0xFF1A1A2E),
+            ),
+            decoration: const InputDecoration(
+              labelText: 'What needs to be done?',
+              prefixIcon: Icon(Icons.task_alt_rounded),
+            ),
+          ),
+          const SizedBox(height: 14),
+          // Description field
+          TextField(
+            controller: _descriptionController,
+            maxLines: 2,
+            style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
+            decoration: const InputDecoration(
+              labelText: 'Description (optional)',
+              prefixIcon: Icon(Icons.notes_rounded),
+              alignLabelWithHint: true,
+            ),
+          ),
+          const SizedBox(height: 24),
+          // Priority selector
+          Text(
+            'Priority',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: isDark ? Colors.white60 : Colors.black54,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [1, 2, 3].map((p) {
+              final isSelected = _selectedPriority == p;
+              final color = AppColors.getPriorityColor(p);
+              final name = AppColors.getPriorityName(p);
+              final icon = AppColors.getPriorityIcon(p);
+              return Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: GestureDetector(
+                    onTap: () => setState(() => _selectedPriority = p),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? color.withAlpha(30)
+                            : (isDark
+                                  ? Colors.white.withAlpha(10)
+                                  : Colors.black.withAlpha(6)),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isSelected ? color : Colors.transparent,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            icon,
+                            color: isSelected ? color : Colors.grey,
+                            size: 20,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            name,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                              color: isSelected ? color : Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 28),
+          // Add button
+          SizedBox(
+            width: double.infinity,
+            height: 54,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    AppColors.primaryGradientStart,
+                    AppColors.primaryGradientEnd,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withAlpha(80),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ElevatedButton(
+                onPressed: () => widget.onAdd(
+                  _titleController.text,
+                  _descriptionController.text,
+                  _selectedPriority,
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.add_rounded, size: 20),
+                    SizedBox(width: 8),
+                    Text(
+                      'Add Task',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
-
-  Widget _buildHandle() => Center(
-    child: Container(
-      width: 40,
-      height: 4,
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        color: Colors.grey[300],
-        borderRadius: BorderRadius.circular(2),
-      ),
-    ),
-  );
-
-  Widget _buildTextField(
-    TextEditingController controller,
-    String label,
-    IconData icon,
-    bool autofocus,
-  ) => TextField(
-    controller: controller,
-    autofocus: autofocus,
-    decoration: InputDecoration(
-      labelText: label,
-      prefixIcon: Icon(icon),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-    ),
-  );
-
-  Widget _buildPrioritySelector() => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text('Priority', style: Theme.of(context).textTheme.titleSmall),
-      const SizedBox(height: 8),
-      Row(
-        children: [1, 2, 3]
-            .map(
-              (p) => Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: ChoiceChip(
-                    label: Text(AppColors.getPriorityName(p)),
-                    selected: _selectedPriority == p,
-                    onSelected: (selected) =>
-                        setState(() => _selectedPriority = p),
-                  ),
-                ),
-              ),
-            )
-            .toList(),
-      ),
-    ],
-  );
-
-  Widget _buildAddButton() => SizedBox(
-    width: double.infinity,
-    height: 50,
-    child: ElevatedButton(
-      onPressed: () => widget.onAdd(
-        _titleController.text,
-        _descriptionController.text,
-        _selectedPriority,
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-      child: const Text(
-        'Add Task',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-      ),
-    ),
-  );
 }

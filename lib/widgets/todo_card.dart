@@ -16,63 +16,147 @@ class TodoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final colorScheme = Theme.of(context).colorScheme;
     final priorityColor = AppColors.getPriorityColor(item.priority);
+    final priorityIcon = AppColors.getPriorityIcon(item.priority);
+    final priorityName = AppColors.getPriorityName(item.priority);
 
-    return Card(
-      elevation: 0,
-      color: colorScheme.surfaceContainerHighest.withAlpha(76),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: colorScheme.outline.withAlpha(50)),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.cardDark : AppColors.cardLight,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withAlpha(60)
+                : Colors.black.withAlpha(12),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border(
+          left: BorderSide(
+            color: item.isCompleted
+                ? colorScheme.outline.withAlpha(60)
+                : priorityColor,
+            width: 4,
+          ),
+        ),
       ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Checkbox(value: item.isCompleted, onChanged: onCheckboxChanged),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.title,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        decoration: item.isCompleted
-                            ? TextDecoration.lineThrough
-                            : null,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                // Custom Checkbox
+                GestureDetector(
+                  onTap: () => onCheckboxChanged(!item.isCompleted),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 26,
+                    height: 26,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: item.isCompleted
+                          ? priorityColor
+                          : Colors.transparent,
+                      border: Border.all(
+                        color: item.isCompleted
+                            ? priorityColor
+                            : colorScheme.outline.withAlpha(120),
+                        width: 2,
                       ),
                     ),
-                    if (item.description.isNotEmpty)
-                      Text(
-                        item.description,
-                        style: TextStyle(color: colorScheme.outline),
-                      ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: priorityColor.withAlpha(25),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  AppColors.getPriorityName(item.priority),
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: priorityColor,
+                    child: item.isCompleted
+                        ? const Icon(
+                            Icons.check_rounded,
+                            size: 16,
+                            color: Colors.white,
+                          )
+                        : null,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 14),
+                // Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.title,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: item.isCompleted
+                              ? colorScheme.onSurface.withAlpha(100)
+                              : colorScheme.onSurface,
+                          decoration: item.isCompleted
+                              ? TextDecoration.lineThrough
+                              : null,
+                          decorationColor: colorScheme.onSurface.withAlpha(100),
+                        ),
+                      ),
+                      if (item.description.isNotEmpty) ...[
+                        const SizedBox(height: 3),
+                        Text(
+                          item.description,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: colorScheme.onSurface.withAlpha(
+                              item.isCompleted ? 70 : 130,
+                            ),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                // Priority badge
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 200),
+                  opacity: item.isCompleted ? 0.4 : 1.0,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: priorityColor.withAlpha(25),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: priorityColor.withAlpha(80),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(priorityIcon, size: 12, color: priorityColor),
+                        const SizedBox(width: 3),
+                        Text(
+                          priorityName,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: priorityColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
