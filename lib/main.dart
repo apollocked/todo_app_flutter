@@ -18,26 +18,39 @@ void main() {
   );
 }
 
-class TodoApp extends StatelessWidget {
+class TodoApp extends StatefulWidget {
   const TodoApp({super.key});
 
   @override
+  State<TodoApp> createState() => _TodoAppState();
+}
+
+class _TodoAppState extends State<TodoApp> {
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final themeProvider = context.read<ThemeProvider>();
+    final todoProvider = context.read<TodoProvider>();
+    await Future.wait([themeProvider.loadTheme(), todoProvider.loadTodos()]);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final todoProvider = Provider.of<TodoProvider>(context, listen: false);
-
-    // Initialize sample data
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      todoProvider.initialize(AppConstants.sampleTodos);
-    });
-
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: AppConstants.appName,
-      themeMode: themeProvider.themeMode,
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      home: const TodoListPage(),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: AppConstants.appName,
+          themeMode: themeProvider.themeMode,
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          home: const TodoListPage(),
+        );
+      },
     );
   }
 }
