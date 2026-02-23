@@ -1,9 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:todo_app/todo_list.dart';
+import 'package:provider/provider.dart';
+import 'package:todo_app/pages/todo_list_page.dart';
+import 'package:todo_app/providers/theme_provider.dart';
+import 'package:todo_app/providers/todo_provider.dart';
+import 'package:todo_app/theme/app_theme.dart';
+import 'package:todo_app/utils/constants.dart';
 
 void main() {
-  runApp(const TodoApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => TodoProvider()),
+      ],
+      child: const TodoApp(),
+    ),
+  );
 }
 
 class TodoApp extends StatelessWidget {
@@ -11,26 +23,21 @@ class TodoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final todoProvider = Provider.of<TodoProvider>(context, listen: false);
+
+    // Initialize sample data
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      todoProvider.initialize(AppConstants.sampleTodos);
+    });
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Premium Todo',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF6750A4),
-          brightness: Brightness.light,
-        ),
-        textTheme: GoogleFonts.outfitTextTheme(),
-      ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFD0BCFF),
-          brightness: Brightness.dark,
-        ),
-        textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme),
-      ),
-      home: const TodoList(),
+      title: AppConstants.appName,
+      themeMode: themeProvider.themeMode,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      home: const TodoListPage(),
     );
   }
 }

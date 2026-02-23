@@ -1,4 +1,4 @@
-import 'package:todo_app/todo_item.dart';
+import 'package:todo_app/models/todo_item.dart';
 
 class TodoData {
   static List<TodoItem> get todos {
