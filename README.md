@@ -31,7 +31,7 @@ The app features a modern, gradient-based UI with:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/todo_app.git
+   git clone https://github.com/apollocked/todo_app.git
    cd todo_app
    ```
 
